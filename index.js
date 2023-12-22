@@ -2,9 +2,9 @@ const express = require('express');
 const app = express();
 app.use(express.json());
 
-// Outside each elevator on each floor there is a dislay
-//On the display there should be a call button, and a log message of the status and destination floor.
-//Inside each elevator there is a display where you can call which floor you want to go to and it 
+//Outside each elevator on each floor there is a dislay
+//On the display there should be a call button, and a log message of the status and destination floor for each elevator.
+//Inside each elevator there is a elevator display where you can call which floor you want to go to.
 
 const elevator1 = {
     id: 1,
@@ -22,13 +22,13 @@ const elevator2 = {
 
 const elevators = [elevator1, elevator2];
 
-const floors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+// const floors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 
 //app.get
 
 app.get('/', (req, res) => {
-    console.log(elevators);
+    res.send(elevators);
 })
 
 app.get('/elevator/:id', (req, res) => {
@@ -40,7 +40,31 @@ app.get('/elevator/:id', (req, res) => {
 
 //app.put
 
-//When you press a floor you want to go to(the inside display of the elevator) it displays the status and destination floor.
+//Is the button on the floor displays that calls the closest elevator to myFloor
+
+app.put('/elevator/call', (req, res) => {
+
+    const myFloor = parseInt(req.body.floor);
+    if (myFloor > 10 || myFloor <= 0) return res.status(400).send('ERROR! Your floor was not found!');
+    const elevator = findClosestElevator(myFloor);
+    console.log(elevator);
+
+    elevator.destinationFloor = myFloor;
+
+    const timeOutDuration = elevatorTravelTime(elevator, myFloor);
+    const travelStatus = validateElevatorStatus(elevator);
+
+    console.log(`${travelStatus} floor ${elevator.destinationFloor}!`);
+
+    setTimeout(() => {
+        elevator.currentFloor = myFloor;
+        elevator.status = 'idle';
+        res.send(`Elevator have arrived at floor ${elevator.currentFloor}!`);
+    }, timeOutDuration);
+
+})
+
+//Is the floor option buttons on the elevator display. When pressed it moves the elevator to the given floor. It displays a status message to all floor displays and displays a message to the elevator display when it have arrived.
 
 app.put('/elevator/move/:id', (req, res) => {
     const elevator = validateElevator(req, elevators)
@@ -58,7 +82,7 @@ app.put('/elevator/move/:id', (req, res) => {
     setTimeout(() => {
         elevator.currentFloor = floor;
         elevator.status = 'idle';
-        res.send(`You have arrived at floor ${elevator.currentFloor}!`);
+        res.send(`Elevator have arrived at floor ${elevator.currentFloor}!`);
     }, timeOutDuration);
 })
 
@@ -88,8 +112,24 @@ function validateElevatorStatus(elevator) {
         return 'Moving up to';
     } else {
         elevator.status = 'idle';
-        return 'You are already at';
+        return 'Elevator already at';
     }
+}
+
+function findClosestElevator(myFloor) {
+    let closestElevator = null;
+    let shortestDistance = 11; // Greater than the maximum floor (10)
+
+    //Compares distance between the 2 elevators.
+    for (let elevator of elevators) {
+        const distance = Math.abs(elevator.currentFloor - myFloor)
+
+        if (distance < shortestDistance) {
+            closestElevator = elevator; //Replaces null with Elevator Object
+            shortestDistance = distance; ///Update shortestDistance
+        }
+    }
+    return closestElevator;
 }
 // function getElevatorStatus(elevator) {
 //     //Retrieve the current location and status of all elevators.
