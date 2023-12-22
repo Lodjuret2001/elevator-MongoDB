@@ -4,7 +4,7 @@ app.use(express.json());
 
 // Outside each elevator on each floor there is a dislay
 //On the display there should be a call button, and a log message of the status and destination floor.
-//Inside each elevator there is a display where you can call which floor you want to go to
+//Inside each elevator there is a display where you can call which floor you want to go to and it 
 
 const elevator1 = {
     id: 1,
@@ -43,18 +43,21 @@ app.get('/elevator/:id', (req, res) => {
 //When you press a floor you want to go to(the inside display of the elevator) it displays the status and destination floor.
 
 app.put('/elevator/move/:id', (req, res) => {
-
-    const timeOutDuration = elevatorTravelTime(elevator, floor);
     const elevator = validateElevator(req, elevators)
     if (!elevator) res.status(400).send('Given elevator was not found')
 
     const floor = parseInt(req.body.floor);
+    if (floor > 10 || floor <= 0) return res.status(400).send('ERROR! Given floor not found.');
     elevator.destinationFloor = floor;
-    
-    console.log(`Going to floor ${elevator.destinationFloor}!`);
+
+    const timeOutDuration = elevatorTravelTime(elevator, floor);
+    const travelStatus = validateElevatorStatus(elevator);
+
+    console.log(`${travelStatus} floor ${elevator.destinationFloor}!`);
 
     setTimeout(() => {
         elevator.currentFloor = floor;
+        elevator.status = 'idle';
         res.send(`You have arrived at floor ${elevator.currentFloor}!`);
     }, timeOutDuration);
 })
@@ -75,8 +78,18 @@ function elevatorTravelTime(elevator, floor) {
     return timeOutDuration;
 }
 
-function validateStatus() {
+function validateElevatorStatus(elevator) {
 
+    if (elevator.currentFloor > elevator.destinationFloor) {
+        elevator.status = 'moving_down';
+        return 'Moving down to';
+    } else if (elevator.currentFloor < elevator.destinationFloor) {
+        elevator.status = 'moving_up';
+        return 'Moving up to';
+    } else {
+        elevator.status = 'idle';
+        return 'You are already at';
+    }
 }
 // function getElevatorStatus(elevator) {
 //     //Retrieve the current location and status of all elevators.
