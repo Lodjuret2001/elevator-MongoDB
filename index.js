@@ -1,6 +1,10 @@
 const express = require('express');
 const app = express();
 app.use(express.json());
+const axios = require('axios');
+const localhost = axios.create({
+    baseURL: 'http://localhost:3000'
+});
 
 //Outside each elevator on each floor there is a dislay
 //On the display there should be a call button, and a log message of the status and destination floor for each elevator.
@@ -153,16 +157,15 @@ function callAllElevators(elevators, [myFloors], [toFloors]) {
 
 //function that displays the status of all elevators
 
+// function displayElevators(elevators) {
+//     console.log('Elevator status');
 
-function displayElevators(elevators) {
-    console.log('Elevator status');
-
-    for (let elevator of elevators) {
-        console.log(`Elevator ${elevator.id}`);
-        console.log(elevator.status);
-    }
-}
-displayElevators(elevators);
+//     for (let elevator of elevators) {
+//         console.log(`Elevator ${elevator.id}`);
+//         console.log(elevator.status);
+//     }
+// }
+// displayElevators(elevators);
 
 const port = process.env.PORT || 3000;
 app.listen(port, console.log(`Listening on port ${port}...`));
