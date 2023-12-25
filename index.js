@@ -20,7 +20,14 @@ const elevator2 = {
     destinationFloor: '',
 };
 
-const elevators = [elevator1, elevator2];
+const elevator3 = {
+    id: 3,
+    currentFloor: 1,
+    status: 'idle',
+    destinationFloor: '',
+};
+
+const elevators = [elevator1, elevator2, elevator3];
 
 // const floors = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
@@ -47,7 +54,7 @@ app.put('/elevator/call', (req, res) => {
     const myFloor = parseInt(req.body.floor);
     if (myFloor > 10 || myFloor <= 0) return res.status(400).send('ERROR! Your floor was not found!');
     const elevator = findClosestElevator(myFloor);
-    console.log(elevator);
+    console.log(`Calling elevator ${elevator.id}`);
 
     elevator.destinationFloor = myFloor;
 
@@ -131,41 +138,31 @@ function findClosestElevator(myFloor) {
     }
     return closestElevator;
 }
-// function getElevatorStatus(elevator) {
-//     //Retrieve the current location and status of all elevators.
-//     return new Promise((resolve, reject) => {
+
+//TEST = 6 diffrent floors executed at same time
+
+//The call to floor function can only take 1 call to floor and then execute  1 move request. when the move request is done and status is idle it can move to the next call. 
+
+function callElevator(myFloor, toFloor) {
+
+}
+
+function callAllElevators(elevators, [myFloors], [toFloors]) {
+
+}
+
+//function that displays the status of all elevators
 
 
-//     })
-// }
+function displayElevators(elevators) {
+    console.log('Elevator status');
 
-// function callElevatorToFloor(floor) {
-//     //Call the closest available elevator to the specified floor.
-//     return new Promise((resolve, reject) => {
-
-//     })
-// }
-
-// function updateElevatorStatus(elevatorId, status, destinationFloor) {
-//     //Update the status and destination floor of an elevator.
-//     return new Promise((resolve, reject) => {
-
-//     })
-// }
-
-// function isElevatorAvailable(elevatorId) {
-//     //Check if a specific elevator is available to serve a new call.
-//     return new Promise((resolve, reject) => {
-
-//     })
-// }
-
-
-
-
-
-
-
+    for (let elevator of elevators) {
+        console.log(`Elevator ${elevator.id}`);
+        console.log(elevator.status);
+    }
+}
+displayElevators(elevators);
 
 const port = process.env.PORT || 3000;
 app.listen(port, console.log(`Listening on port ${port}...`));
