@@ -35,7 +35,19 @@ const elevator3 = {
 const elevators = [elevator1, elevator2, elevator3];
 
 
-//EXPRESS ----- HTTP ----- REQUESTS
+//Elevator Commands
+
+getElevatorStatus(elevators);
+// callElevatorToFloor(2);
+updateElevatorStatus(1, 'moving_up', 4);
+updateElevatorStatus(2, 'moving_up', 6);
+updateElevatorStatus(3, 'idle', 10);
+getElevatorStatus(elevators);
+isElevatorAvailable(1);
+isElevatorAvailable(3);
+
+
+//EXPRESS ----- HTTP ----- ENDPOINTS
 
 //app.get
 app.get('/', (req, res) => {
@@ -70,7 +82,6 @@ app.put('/elevator/call', async (req, res) => {
 
             await updateElevator(elevator, timeOutDuration, myFloor)
 
-            console.log(`Elevator have arrived at floor ${elevator.currentFloor}!`)
             res.send(`Elevator have arrived at floor ${elevator.currentFloor}!`);
         }
     } catch (error) {
@@ -96,7 +107,6 @@ app.put('/elevator/move/:id', async (req, res) => {
 
         await updateElevator(elevator, timeOutDuration, toFloor);
 
-        console.log(`Elevator have arrived at floor ${elevator.currentFloor}!`)
         res.send(`Elevator have arrived at floor ${elevator.currentFloor}!`);
 
     } catch (error) {
@@ -154,21 +164,22 @@ async function findClosestElevator(myFloor) {
 
             if (distance < shortestDistance) {
                 closestElevator = elevator; //Replaces null with Elevator Object
-                shortestDistance = distance; ///Update shortestDistance
+                shortestDistance = distance; //Update shortestDistance
             }
             if (closestElevator.status !== 'idle') {
                 const availableElevator = await isElevatorAvailable(elevators);
-                availableElevator = closestElevator;
+                closestElevator = availableElevator;
                 return closestElevator;
             }
         }
         return closestElevator;
     } catch (error) {
-        console.error('error.message');
+        console.error(error.message);
     }
 }
 
 async function isElevatorAvailable(elevators) {
+    //If all elevators are in motion, the system should still execute the command when the next available elevator is free.
     try {
         while (true) {
             const availableElevator = elevators.find(elevator => elevator.status === 'idle');
@@ -178,6 +189,37 @@ async function isElevatorAvailable(elevators) {
     } catch (error) {
         console.error(error.message);
     }
+}
+
+//Elevator ----- Command ----- Functions
+
+function getElevatorStatus(elevators) {
+    console.log('Elevator status:');
+    for (let elevator of elevators) {
+        console.log(`Elevator ${elevator.id}, Current location: ${elevator.currentFloor}, Status: ${elevator.status}, Destination: ${elevator.destinationFloor}`);
+    }
+}
+
+async function callElevatorToFloor(floor) {
+    try {
+        const request = await axios.put('elevator/call', { floor });
+        console.log(request.data);
+    } catch (error) {
+        console.error(error.message);
+    }
+}
+
+function updateElevatorStatus(elevatorId, status, destinationFloor) {
+    const elevator = elevators.find(elevator => elevator.id === elevatorId);
+    elevator.status = status;
+    elevator.destinationFloor = destinationFloor;
+}
+
+function isElevatorAvailable(elevatorId) {
+    const elevator = elevators.find(elevator => elevator.id === elevatorId);
+    if (elevator.status === 'idle') {
+        console.log(`Elevator ${elevator.id} is available!`);
+    } else return console.log(`Elevator ${elevator.id} is not available!`);
 }
 
 console.log('After');
