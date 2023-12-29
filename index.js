@@ -5,7 +5,7 @@ app.use(express.json());
 const axios = require('axios');
 axios.defaults.baseURL = 'http://localhost:3000';
 
-//Outside each elevator on each floor there is a dislay
+//Outside each floor there is a dislay
 //On the display there should be a call button, and a log message of the status and destination floor for each elevator.
 //Inside each elevator there is a elevator display where you can call which floor you want to go to.
 
@@ -44,7 +44,9 @@ const elevators = [elevator1, elevator2, elevator3];
 // getElevatorStatus(elevators);
 // isElevatorAvailable(1);
 // isElevatorAvailable(3);
-// callMultipleElevatorToFloors([2, 4, 6, 8]);
+// callMultipleElevatorToFloors([1, 2, 3, 4, 5, 6]);
+// callMultipleElevatorToFloors([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]);
+// callMultipleElevatorToFloors([3, 3, 3]);
 
 //EXPRESS ----- HTTP ----- ENDPOINTS
 
@@ -56,7 +58,6 @@ app.get('/', (req, res) => {
 app.get('/elevator/:id', (req, res) => {
     const elevator = validateElevator(req, elevators)
     if (!elevator) res.status(400).send('Given elevator was not found')
-
     res.send(elevator);
 })
 
@@ -73,17 +74,18 @@ app.put('/elevator/call', async (req, res) => {
         const timeOutDuration = elevatorTravelTime(elevator, myFloor);
 
         if (elevator.currentFloor === myFloor) {
+            console.log(`Elevator ${elevator.id} is already at floor ${elevator.destinationFloor}!`);
             res.send(`Elevator is already at floor ${elevator.destinationFloor}!`);
         } else {
-            console.log(`Calling elevator ${elevator.id}`)
-            console.log(`${travelStatus} floor ${elevator.destinationFloor}!`)
+            // console.log(`Calling elevator ${elevator.id}`)
+            console.log(`Elevator ${elevator.id} is ${travelStatus} floor ${elevator.destinationFloor}!`)
 
             await travelElevator(timeOutDuration)
             updateElevator(elevator, myFloor)
-            console.log(`Elevator ${elevator.id} was updated`);
+            // console.log(`Elevator ${elevator.id} was updated`);
 
             res.send(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
-            console.log(`Elevator have arrived at floor ${elevator.currentFloor}!`);
+            console.log(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
         }
     } catch (error) {
         console.error(error.message);
@@ -104,15 +106,17 @@ app.put('/elevator/move/:id', async (req, res) => {
         const timeOutDuration = elevatorTravelTime(elevator, toFloor);
 
         if (elevator.currentFloor === toFloor) {
+            console.log(`Elevator ${elevator.id} is already at floor ${elevator.destinationFloor}!`);
             res.send(`Elevator is already at floor ${elevator.destinationFloor}!`);
         } else {
-            console.log(`${travelStatus} floor ${elevator.destinationFloor}!`);
+            // console.log(`Calling elevator ${elevator.id}`)
+            console.log(`Elevator ${elevator.id} is ${travelStatus} floor ${elevator.destinationFloor}!`)
             await travelElevator(timeOutDuration);
             updateElevator(elevator, toFloor);
-            console.log(`Elevator ${elevator.id} was updated`);
+            // console.log(`Elevator ${elevator.id} was updated`);
 
             res.send(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
-            console.log(`Elevator have arrived at floor ${elevator.currentFloor}!`);
+            console.log(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
         }
     } catch (error) {
         console.error(error.message);
@@ -171,7 +175,6 @@ async function findClosestElevator(myFloor) {
         // Extracts the elevator/s with status 'idle'.
         let availableElevators = await findIdleElevator();
         if (availableElevators.length === 0) {
-            console.log('No available elevators');
             let idleElevator = await findIdleElevator();
             availableElevators = idleElevator;
             return availableElevators;
@@ -181,7 +184,7 @@ async function findClosestElevator(myFloor) {
 
         // Compares distance between the availableElevators and returns the closestElevator.
         for (let elevator of availableElevators) {
-            console.log(`Searching Elevator ${elevator.id}`);
+            // console.log(`Searching Elevator ${elevator.id}`);
             const distance = Math.abs(elevator.currentFloor - myFloor);
 
             if (distance < shortestDistance) {
@@ -189,7 +192,7 @@ async function findClosestElevator(myFloor) {
                 shortestDistance = distance;
             }
         }
-        console.log(`Returning Elevator ${closestElevator.id}`);
+        console.log(`Found Elevator ${closestElevator.id}`);
         return closestElevator;
     } catch (error) {
         console.error(error.message);
@@ -197,19 +200,19 @@ async function findClosestElevator(myFloor) {
 }
 
 async function findIdleElevator() {
-    //Filters through all elevators with status 'idle', if status !== 'idle' it will search every 3 seconds for an avilable elevator. It will resolve when a elevator/elevators is found. Will return an array of objects.
+    //Filters through all elevators with status 'idle', if status !== 'idle' it will search every 2 seconds for an avilable elevator. It will resolve when a elevator/elevators is found. Will return an array of objects.
     return new Promise((resolve, reject) => {
         const interval = setInterval(() => {
-            console.log('Searching for Elevators with status idle');
+            // console.log('Searching for Elevators with status idle');
             let idleElevator = elevators.filter(elevator => elevator.status === 'idle');
             if (idleElevator.length > 0) {
-                idleElevator.forEach(elevator => {
-                    console.log(`Found Elevator ${elevator.id}`);
-                })
+                // idleElevator.forEach(elevator => {
+                //     console.log(`Found Elevator ${elevator.id}`);
+                // })
                 clearInterval(interval);
                 resolve(idleElevator);
             }
-        }, 3000);
+        }, 2000);
     })
 }
 
@@ -234,7 +237,7 @@ function callElevatorToFloor(floor) {
 }
 
 function callMultipleElevatorToFloors(floors) {
-    //Calls multiple floors at same time
+    //Calls multiple floors at same time (floors must be an array of numbers)
     try {
         for (let floor of floors) {
             axios.put('/elevator/call', { floor });
