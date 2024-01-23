@@ -1,63 +1,101 @@
-Elevator Control System
+I apologize for the confusion. I've updated the README to correctly reflect the provided endpoints:
 
-This project implements an elevator control system using Node.js and Express. It simulates the operation of elevators in a building with the ability to call elevators to different floors and move them to specific destinations.
+```markdown
+# Elevator Control System
 
-Features
-- Call elevators to specific floors.
-- Move elevators to desired destinations.
-- Find the closest available elevator.
-- Check elevator status and availability.
+This project implements a simple elevator control system using Node.js and Express.
 
-Getting Started
+## Setup
 
-Before you start, ensure you have the following prerequisites installed:
-
-- Node.js
-- Express.js
-- Axios
-
-Installation
-
-1. Clone the repository:
-
-   git clone <repository-url>
+1. Navigate to your project folder:
+   ```bash
+   cd path/to/your/project
+   ```
 
 2. Install dependencies:
-
+   ```bash
    npm install
+   ```
 
-The server will start on the specified port (default is 3000).
+3. Run the application:
+   ```bash
+   npm start | node index.js | nodemon index.js
+   ```
 
-Usage
+The application will be running on `http://localhost:3000`.
 
-The system provides a set of API endpoints to interact with the elevators. You can use these endpoints to call elevators, move them to specific floors, and retrieve elevator information.
+## API Endpoints
 
-API Endpoints
+### GET Requests
 
-- GET / - Get the status of all elevators.
-- GET /elevator/:id - Get the status of a specific elevator by ID.
-- PUT /elevator/call - Call the closest available elevator to a specific floor.
-- PUT /elevator/move/:id - Move a specific elevator to a desired floor.
+#### 1. Get All Elevators
+```http
+GET /
+```
+Returns a list of all elevators.
 
-Validation Functions
+#### 2. Get Elevator by ID
+```http
+GET /elevator/:id
+```
+Returns information about a specific elevator based on the provided ID.
 
-- validateElevator(req, elevators) - Validate the existence of a specific elevator.
-- elevatorTravelTime(elevator, floor) - Calculate travel time between floors.
-- validateElevatorStatus(elevator) - Validate and update elevator status.
-- delay(ms) - Simulate a time delay.
-- travelElevator(timeOutDuration) - Simulate elevator movement delay.
-- updateElevator(elevator, floor) - Update elevator status after arriving at a floor.
-- findClosestElevator(myFloor) - Find the closest available elevator to a given floor.
-- findIdleElevator() - Find idle elevators.
+### PUT Requests
 
-Elevator Command Functions
+#### 3. Call Elevator to Floor
+```http
+PUT /elevator/call
+```
 
-- getElevatorStatus(elevators) - Log the status of all elevators.
-- callElevatorToFloor(floor) - Call the closest elevator to a given floor.
-- callMultipleElevatorToFloors(floors) - Call multiple elevators to different floors simultaneously.
-- updateElevatorStatus(elevatorId, status, destinationFloor) - Update elevator status and destination floor.
-- isElevatorAvailable(elevatorId) - Check if a specific elevator is available.
+Body:
+```json
+{
+  "floor": 2
+}
+```
 
-License
+#### 4. Move Elevator to Floor
+```http
+PUT /elevator/move/:id
+```
 
-This project is licensed under the MIT License.
+Body:
+```json
+{
+  "floor": 5
+}
+```
+
+### Commands
+
+Some commands have been provided in the index.js. Uncomment and use them as needed.
+
+### Elevator Control Functions
+
+Various utility functions have been implemented to control elevators.
+
+#### Functions (to be used internally)
+
+- `createAxios`: Create an Axios instance.
+- `findElevator`: Find elevator by ID.
+- `findElevatorFromReq`: Find elevator from request parameters.
+- `validateFloorFromReq`: Validate floor from request body.
+- `changeElevatorStatus`: Change elevator status based on destination floor.
+- `calculateTravelTime`: Calculate travel time between floors.
+- `displayTravelStatement`: Display travel statement based on elevator and floor.
+- `moveElevator`: Move elevator asynchronously with a specified travel time.
+- `resetElevator`: Reset elevator status and floor.
+- `findClosestElevatorTo`: Find the closest available elevator to a floor.
+- `displayArrival`: Display elevator arrival message.
+
+#### Functions (not exported)
+
+- `delay`: Introduce a delay using a Promise.
+- `findIdleElevator`: Find an idle elevator asynchronously.
+
+## Notes
+
+- Adjust the base URL in the `createAxios` function.
+- Ensure proper setup and dependencies are installed.
+- Use provided API endpoints to interact with the elevator control system.
+```

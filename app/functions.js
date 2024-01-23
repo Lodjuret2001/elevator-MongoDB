@@ -2,16 +2,16 @@ import axios from 'axios';
 import { elevators } from './data.js';
 
 function createAxios() {
-    const axios = axios.create({
+    const axiosInstance = axios.create({
         baseURL: 'http://localhost:3000'
     });
-    return axios;
+    return axiosInstance;
 }
 
 function findElevator(elevatorId, elevators) {
     const elevator = elevators.find(elevator => elevator.id === elevatorId);
 
-    if (!elevator) {
+    if (!elevator || undefined) {
         return console.log(`Elevator with ID: ${elevatorId} does not exist.`);
     }
     return elevator;
@@ -51,12 +51,14 @@ function calculateTravelTime(elevator, floor) {
     return floorsToTravel * 3000;
 }
 
-function displayTravelStatement(elevator, myFloor, res, travelStatement) {
-    let message = (elevator.currentFloor === myFloor)
+function displayTravelStatement(elevator, floor, res, travelStatement) {
+    let message = (elevator.currentFloor === floor)
         ? `${travelStatement} floor ${elevator.destinationFloor}!`
         : `Elevator ${elevator.id} is ${travelStatement} floor ${elevator.destinationFloor}!`;
 
-    if (elevator.currentFloor === myFloor) {
+    if (elevator.currentFloor === floor) {
+
+        console.log(message);
         res.send(message);
 
     } else console.log(message);
@@ -73,14 +75,16 @@ function resetElevator(elevator, floor) {
     elevator.destinationFloor = '';
 }
 
-async function findClosestElevatorTo(myFloor) {
+async function findClosestElevatorTo(floor) {
     try {
+
         let availableElevators = await findIdleElevator();
 
-        let closestElevator = calculateDistance(availableElevators);
+        let closestElevator = calculateDistance(availableElevators, floor);
         console.log(`Found Elevator ${closestElevator.id}`);
 
         return closestElevator;
+
     } catch (error) {
         console.error(error.message);
     }
@@ -116,13 +120,13 @@ async function findIdleElevator() {
     })
 }
 
-function calculateDistance(elevators) {
+function calculateDistance(elevators, floor) {
 
     let closestElevator = null;
     let shortestDistance = 11; // Greater than the maximum floor (10)
 
     for (let elevator of elevators) {
-        const distance = Math.abs(elevator.currentFloor - myFloor);
+        const distance = Math.abs(elevator.currentFloor - floor);
 
         if (distance < shortestDistance) {
             closestElevator = elevator;

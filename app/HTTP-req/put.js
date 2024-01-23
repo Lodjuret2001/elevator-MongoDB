@@ -33,11 +33,11 @@ router.put('/elevator/move/:id', async (req, res) => {
 
         const travelStatement = changeElevatorStatus(elevator);
         const travelTime = calculateTravelTime(elevator, toFloor);
-        displayTravelStatement(elevator, myFloor, res, travelStatement);
+        displayTravelStatement(elevator, toFloor, res, travelStatement);
         await moveElevator(travelTime);
 
         resetElevator(elevator, toFloor);
-        displayArrival(elevator);
+        displayArrival(elevator, res);
 
     } catch (error) {
         console.error(error.message);

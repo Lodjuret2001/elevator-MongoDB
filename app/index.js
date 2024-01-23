@@ -2,10 +2,13 @@ import express from 'express';
 const app = express();
 app.use(express.json());
 
+import { elevators } from './data.js';
+
 //HTTP-REQ
 
-import { router as getRoutes } from 'app\HTTP-req\get.js';
-import { router as putRoutes } from 'app\HTTP-req\put.js';
+import { router as getRoutes } from './HTTP-req/get.js';
+import { router as putRoutes } from './HTTP-req/put.js';
+
 
 app.use(getRoutes);
 app.use(putRoutes);
@@ -29,5 +32,3 @@ import { getElevatorStatus, callElevatorToFloor, callMultipleElevatorToFloors, u
 
 const port = process.env.PORT || 3000;
 app.listen(port, console.log(`Listening on port ${port}...`));
-
-

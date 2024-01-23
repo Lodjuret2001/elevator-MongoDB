@@ -1,9 +1,7 @@
-import axios from 'axios';
-const axios = createAxios();
-
-
 import { elevators } from "./data.js";
 import { createAxios, findElevator } from './functions.js';
+
+const axios = createAxios();
 
 function getElevatorStatus(elevators) {
     console.log('Elevators status:');
@@ -33,14 +31,12 @@ function callMultipleElevatorToFloors(floors) {
     }
 }
 
-
 function updateElevatorStatus(elevatorId, status, destinationFloor) {
     const elevator = findElevator(elevatorId, elevators);
     elevator.status = status;
     elevator.destinationFloor = destinationFloor;
     console.log(`Elevator ${elevator.id} was updated to Status: ${elevator.status}.`);
 }
-
 
 function isElevatorAvailable(elevatorId) {
     const elevator = findElevator(elevatorId, elevators);
