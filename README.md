@@ -1,6 +1,3 @@
-I apologize for the confusion. I've updated the README to correctly reflect the provided endpoints:
-
-```markdown
 # Elevator Control System
 
 This project implements a simple elevator control system using Node.js and Express.
