@@ -1,5 +1,7 @@
+import AsyncLock from 'async-lock';
+const lock = new AsyncLock();
+
 import axios from 'axios';
-import { elevators } from './data.js';
 
 function createAxios() {
     const axiosInstance = axios.create({
@@ -8,42 +10,53 @@ function createAxios() {
     return axiosInstance;
 }
 
-function findElevator(elevatorId, elevators) {
-    const elevator = elevators.find(elevator => elevator.id === elevatorId);
+import { Elevator } from './MongoDB/modelDB.js';
 
-    if (!elevator || undefined) {
-        return console.log(`Elevator with ID: ${elevatorId} does not exist.`);
-    }
-    return elevator;
+async function findElevatorFromReq(req) {
+    
+    const id = parseInt(req.params.id);
+    return await Elevator.findById(id);
 }
 
-function findElevatorFromReq(req, res, elevators) {
-    const elevator = elevators.find(elevator => elevator.id === parseInt(req.params.id));
+async function findClosestElevatorTo(floor) {
+    
+    try {
+        const release = await lock.acquire('elevatorLock', async () => {
 
-    if (!elevator) res.status(400).send(`Elevator with ID: ${req.params.id} does not exist.`)
-    return elevator;
-}
+            try {
+                const availableElevators = await findIdleElevator();
+                let closestElevator = calculateDistance(availableElevators, floor);
 
-function validateFloorFromReq(req, res) {
-    const floor = parseInt(req.body.floor);
+                closestElevator = await Elevator.findByIdAndUpdate(closestElevator.id, { destinationFloor: floor }, { new: true });
 
-    if (isNaN(floor) || floor > 10 || floor <= 0) return res.status(400).send(`ERROR! Given floor was not found!`);
+                return closestElevator;
 
-    return floor;
-}
+            } catch (error) {
+              console.error(error);
+            }
+        });
 
-function changeElevatorStatus(elevator) {
-    if (elevator.currentFloor > elevator.destinationFloor) {
-        elevator.status = 'moving_down';
-        return 'Moving down to';
-    } else if (elevator.currentFloor < elevator.destinationFloor) {
-        elevator.status = 'moving_up';
-        return 'Moving up to';
-    } else {
-        elevator.status = 'idle';
-        return 'Elevator already at';
+        return release;
+
+    } catch (error) {
+        console.error(`Error in findClosestElevatorTo: ${error.message}`);
     }
 }
+
+async function changeElevatorStatus(elevator) {
+
+    const id = elevator.id;
+    const direction = elevator.currentFloor < elevator.destinationFloor ? 'up' : 'down';
+
+    const update = {
+        status: `moving_${direction}`,
+    };
+
+    console.log(`Elevator ${id} is moving ${direction} to floor ${elevator.destinationFloor}!`);
+
+    return await Elevator.findByIdAndUpdate(id, update, { new: true });
+}
+
 
 function calculateTravelTime(elevator, floor) {
     //Each floor takes 3 seconds to travel
@@ -51,53 +64,27 @@ function calculateTravelTime(elevator, floor) {
     return floorsToTravel * 3000;
 }
 
-function displayTravelStatement(elevator, floor, res, travelStatement) {
-    let message = (elevator.currentFloor === floor)
-        ? `${travelStatement} floor ${elevator.destinationFloor}!`
-        : `Elevator ${elevator.id} is ${travelStatement} floor ${elevator.destinationFloor}!`;
-
-    if (elevator.currentFloor === floor) {
-
-        console.log(message);
-        res.send(message);
-
-    } else console.log(message);
-}
-
 async function moveElevator(travelTime) {
     console.log(`Waiting for ${travelTime / 1000} seconds`);
     await delay(travelTime);
 }
 
-function resetElevator(elevator, floor) {
-    elevator.status = 'idle';
-    elevator.currentFloor = floor;
-    elevator.destinationFloor = '';
-}
+async function resetElevator(elevator) {
 
-async function findClosestElevatorTo(floor) {
-    try {
+    const id = elevator.id;
 
-        let availableElevators = await findIdleElevator();
+    const reset = {
+        status: 'idle',
+        currentFloor: elevator.destinationFloor,
+        destinationFloor: 0
+    };
 
-        let closestElevator = calculateDistance(availableElevators, floor);
-        console.log(`Found Elevator ${closestElevator.id}`);
-
-        return closestElevator;
-
-    } catch (error) {
-        console.error(error.message);
-    }
-}
-
-function displayArrival(elevator, res) {
-    res.send(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
-    console.log(`Elevator ${elevator.id} have arrived at floor ${elevator.currentFloor}!`);
+    return await Elevator.findByIdAndUpdate(id, reset, { new: true });
 }
 
 //Functions that should not be exported
 
-function delay(ms) {
+async function delay(ms) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -105,14 +92,18 @@ async function findIdleElevator() {
 
     return new Promise((resolve, reject) => {
 
-        const timeLoop = setInterval(() => {
+        const timeLoop = setInterval(async () => {
             try {
-                let idleElevator = elevators.filter(elevator => elevator.status === 'idle');
+                console.log('Searching for elevators...');
+
+                const idleElevator = await Elevator.find({ destinationFloor: 0 });
 
                 if (idleElevator.length > 0) {
+                    console.log('Found:', idleElevator);
                     clearInterval(timeLoop);
                     resolve(idleElevator);
                 }
+
             } catch (error) {
                 console.log(error.message);
             }
@@ -137,4 +128,4 @@ function calculateDistance(elevators, floor) {
 }
 
 
-export { createAxios, findElevator, findElevatorFromReq, validateFloorFromReq, changeElevatorStatus, calculateTravelTime, displayTravelStatement, moveElevator, resetElevator, findClosestElevatorTo, displayArrival };
+export { createAxios, findElevatorFromReq, changeElevatorStatus, calculateTravelTime, moveElevator, resetElevator, findClosestElevatorTo };

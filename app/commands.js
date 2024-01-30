@@ -1,10 +1,14 @@
-import { elevators } from "./data.js";
-import { createAxios, findElevator } from './functions.js';
+import { createAxios } from './functions.js';
+import { getElevators } from './MongoDB/funcDB.js';
+import { Elevator } from './MongoDB/modelDB.js';
 
 const axios = createAxios();
 
-function getElevatorStatus(elevators) {
+async function getElevatorStatus() {
+
+    const elevators = await getElevators();
     console.log('Elevators status:');
+
     for (let elevator of elevators) {
         console.log(`Elevator ${elevator.id}, Current location: ${elevator.currentFloor}, Status: ${elevator.status}, Destination: ${elevator.destinationFloor}`);
     }
@@ -31,15 +35,22 @@ function callMultipleElevatorToFloors(floors) {
     }
 }
 
-function updateElevatorStatus(elevatorId, status, destinationFloor) {
-    const elevator = findElevator(elevatorId, elevators);
-    elevator.status = status;
-    elevator.destinationFloor = destinationFloor;
-    console.log(`Elevator ${elevator.id} was updated to Status: ${elevator.status}.`);
+
+async function updateElevatorStatus(elevatorId, status, destinationFloor) {
+
+    const update = {
+        status: status,
+        destinationFloor: destinationFloor
+    };
+    const updatedElevator = await Elevator.findByIdAndUpdate(elevatorId, update, { new: true })
+    
+    console.log(`Elevator ${updatedElevator.id} was updated to status: ${updatedElevator.status}.`);
 }
 
-function isElevatorAvailable(elevatorId) {
-    const elevator = findElevator(elevatorId, elevators);
+async function isElevatorAvailable(elevatorId) {
+
+    const elevator = await Elevator.findById(elevatorId);
+
     if (elevator.status === 'idle') {
         return console.log(`Elevator ${elevator.id} is available!`);
     }
