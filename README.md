@@ -4,20 +4,27 @@ This project implements a simple elevator control system using Node.js and Expre
 
 ## Setup
 
-1. Navigate to your project folder:
+1. Clone the GitHub repository to your local machine:
+
+   ```bash
+   git clone https://github.com/lodjuret2001/elevator-control-system.git
+   ```
+
+2. Navigate to your project folder:
    ```bash
    cd path/to/your/project
    ```
 
-2. Install dependencies:
+3. Install dependencies:
    ```bash
    npm install
    ```
 
-3. Run the application:
+4. Run the application:
    ```bash
    npm start | node index.js | nodemon index.js
    ```
+```
 
 The application will be running on `http://localhost:3000`.
 
@@ -90,9 +97,68 @@ Various utility functions have been implemented to control elevators.
 - `delay`: Introduce a delay using a Promise.
 - `findIdleElevator`: Find an idle elevator asynchronously.
 
+## MongoDB Setup
+
+Ensure that you have MongoDB installed and running.
+
+```javascript
+import mongoose from 'mongoose';
+
+mongoose.connect('your-connection-string-here')
+    .then(() => console.log('Connected to MongoDB'))
+    .catch((err) => console.error('Could not connect to database', err));
+```
+
+## MongoDB Schema
+
+```javascript
+import mongoose from "mongoose";
+
+const elevatorSchema = new mongoose.Schema({
+    _id: String,
+    currentFloor: Number,
+    status: String,
+    destinationFloor: { type: Number, default: 0 }
+});
+
+const Elevator = mongoose.model('Elevator', elevatorSchema);
+
+export { Elevator };
+```
+
+## Importing Elevator Data
+
+To import the elevator data to your local MongoDB server, follow these steps:
+
+1. Clone the GitHub repository to your local machine:
+
+   ```bash
+   git clone https://github.com/lodjuret2001/elevator-control-system.git
+   ```
+
+2. Open a terminal or command prompt.
+
+3. Use the following command to import the elevator data to your local MongoDB server:
+
+   ```bash
+   mongoimport --db elevator-app --collection elevators --file your-path-to-the-json-file\data.json --jsonArray
+   ```
+
+   Replace `your-path-to-the-json-file` with the actual path to the `data.json` file.
+
+   - `--db elevator-app`: Specifies the name of the database (`elevator-app`). Change it if your database has a different name.
+   - `--collection elevators`: Specifies the name of the collection (`elevators`). Change it if your collection has a different name.
+   - `--file your-path-to-the-json-file\data.json`: Specifies the path to your elevator data JSON file.
+   - `--jsonArray`: Indicates that the provided file contains an array of JSON documents.
+
+4. After executing the command, you should see output indicating the progress of the import.
+
 ## Notes
 
 - Adjust the base URL in the `createAxios` function.
 - Ensure proper setup and dependencies are installed.
 - Use provided API endpoints to interact with the elevator control system.
 ```
+
+
+
