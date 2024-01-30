@@ -4,29 +4,27 @@ This project implements a simple elevator control system using Node.js and Expre
 
 ## Setup
 
-1. Clone the GitHub repository to your local machine:
-
+1. **Clone the GitHub repository to your local machine:**
    ```bash
    git clone https://github.com/lodjuret2001/elevator-control-system.git
    ```
 
-2. Navigate to your project folder:
+2. **Navigate to your project folder:**
    ```bash
    cd path/to/your/project
    ```
 
-3. Install dependencies:
+3. **Install dependencies:**
    ```bash
    npm install
    ```
 
-4. Run the application:
+4. **Run the application:**
    ```bash
    npm start | node index.js | nodemon index.js
    ```
-```
 
-The application will be running on `http://localhost:3000`.
+   The application will be running on `http://localhost:3000`.
 
 ## API Endpoints
 
@@ -130,28 +128,25 @@ export { Elevator };
 
 To import the elevator data to your local MongoDB server, follow these steps:
 
-1. Clone the GitHub repository to your local machine:
-
+1. **Clone the GitHub repository to your local machine:**
    ```bash
    git clone https://github.com/lodjuret2001/elevator-control-system.git
    ```
 
-2. Open a terminal or command prompt.
+2. **Open a terminal or command prompt.**
 
-3. Use the following command to import the elevator data to your local MongoDB server:
-
+3. **Use the following command to import the elevator data to your local MongoDB server:**
    ```bash
    mongoimport --db elevator-app --collection elevators --file your-path-to-the-json-file\data.json --jsonArray
    ```
 
    Replace `your-path-to-the-json-file` with the actual path to the `data.json` file.
-
    - `--db elevator-app`: Specifies the name of the database (`elevator-app`). Change it if your database has a different name.
    - `--collection elevators`: Specifies the name of the collection (`elevators`). Change it if your collection has a different name.
    - `--file your-path-to-the-json-file\data.json`: Specifies the path to your elevator data JSON file.
    - `--jsonArray`: Indicates that the provided file contains an array of JSON documents.
 
-4. After executing the command, you should see output indicating the progress of the import.
+4. **After executing the command, you should see output indicating the progress of the import.**
 
 ## Notes
 
@@ -159,6 +154,3 @@ To import the elevator data to your local MongoDB server, follow these steps:
 - Ensure proper setup and dependencies are installed.
 - Use provided API endpoints to interact with the elevator control system.
 ```
-
-
-
