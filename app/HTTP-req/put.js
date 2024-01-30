@@ -18,6 +18,7 @@ router.put('/elevator/call', async (req, res) => {
         if (elevator.currentFloor === myFloor) {
 
             elevator = await resetElevator(elevator);
+            console.log(`Elevator ${elevator.id} is already at floor ${myFloor}...`);
             return res.send(`Elevator ${elevator.id} is already at floor ${myFloor}...`);
         }
 
@@ -49,6 +50,7 @@ router.put('/elevator/move/:id', async (req, res) => {
         if (elevator.currentFloor === toFloor) {
 
             elevator = await resetElevator(elevator);
+            console.log(`Elevator ${elevator.id} is already at floor ${myFloor}...`);
             return res.send(`Elevator ${elevator.id} is already at floor ${toFloor}...`);
         }
 

@@ -23,7 +23,7 @@ import { getElevatorStatus, callElevatorToFloor, callMultipleElevatorToFloors, u
 async function run() {
     
     // await getElevatorStatus();
-    // await callElevatorToFloor(2);
+    await callElevatorToFloor(4);
     // await updateElevatorStatus(1, 'idle', 0);
     // await updateElevatorStatus(2, 'idle', 0);
     // await updateElevatorStatus(3, 'idle', 0);
